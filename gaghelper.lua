@@ -14,7 +14,7 @@ screenGui.Parent = playerGui
 -- Buton container'ı oluştur
 local buttonContainer = Instance.new("Frame")
 buttonContainer.Name = "ButtonContainer"
-buttonContainer.Size = UDim2.new(0, 220, 0, 120)
+buttonContainer.Size = UDim2.new(0, 24, 0, 14)
 buttonContainer.Position = UDim2.new(1, -300, 0, 2) -- Sağdan 240px sola, üstten 20px aşağı
 --buttonContainer.Position = UDim2.new(0.5, -110, 0.5, -60) -- Ekranın ortası
 buttonContainer.BackgroundTransparency = 1 -- Şeffaf arkaplan
@@ -23,7 +23,7 @@ buttonContainer.Parent = screenGui
 -- Gear butonu oluştur
 local gearButton = Instance.new("TextButton")
 gearButton.Name = "GearButton"
-gearButton.Size = UDim2.new(0, 100, 0, 50)
+gearButton.Size = UDim2.new(0, 80, 0, 40)
 gearButton.Position = UDim2.new(0, 0, 0, 0)
 gearButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 gearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -35,7 +35,7 @@ gearButton.Parent = buttonContainer
 -- Event butonu oluştur
 local eventButton = Instance.new("TextButton")
 eventButton.Name = "EventButton"
-eventButton.Size = UDim2.new(0, 100, 0, 50)
+eventButton.Size = UDim2.new(0, 80, 0, 40)
 eventButton.Position = UDim2.new(0, 120, 0, 0)
 eventButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
 eventButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -131,3 +131,4 @@ end
 -- Buton tıklama event'leri
 gearButton.MouseButton1Click:Connect(teleportToGear)
 eventButton.MouseButton1Click:Connect(teleportToEvent)
+
