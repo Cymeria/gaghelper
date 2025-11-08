@@ -1,135 +1,187 @@
--- TeleportButonScript
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Ekran GUI'sini oluştur
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TeleportGUI"
-screenGui.Parent = playerGui
+-- Işınlanma konumları (istediğiniz gibi değiştirebilirsiniz)
+local TELEPORT_POSITIONS = {
+	Vector3.new(-285, 1, -14),    -- Buton 1 ışınlanma pozisyonu
+	Vector3.new(-113, 5, 1),    -- Buton 2 ışınlanma pozisyonu
+	Vector3.new(127, 5, 168)      -- Buton 3 ışınlanma pozisyonu
+}
 
--- Buton container'ı oluştur
-local buttonContainer = Instance.new("Frame")
-buttonContainer.Name = "ButtonContainer"
-buttonContainer.Size = UDim2.new(0, 4, 0, 14)
-buttonContainer.Position = UDim2.new(1, -300, 0, 2) -- Sağdan 240px sola, üstten 20px aşağı
---buttonContainer.Position = UDim2.new(0.5, -110, 0.5, -60) -- Ekranın ortası
-buttonContainer.BackgroundTransparency = 1 -- Şeffaf arkaplan
-buttonContainer.Parent = screenGui
+-- Buton konumları (UDim2 formatında - istediğiniz gibi değiştirebilirsiniz)
+local BUTTON_POSITIONS = {
+	UDim2.new(0, 5, 0, 25),   -- Buton 1 ekran pozisyonu (X: 100, Y: 10)
+	UDim2.new(0, 5, 0, 70),   -- Buton 2 ekran pozisyonu (X: 190, Y: 10)
+	UDim2.new(0, 5, 0, 115)    -- Buton 3 ekran pozisyonu (X: 280, Y: 10)
+}
 
--- Gear butonu oluştur
-local gearButton = Instance.new("TextButton")
-gearButton.Name = "GearButton"
-gearButton.Size = UDim2.new(0, 80, 0, 40)
-gearButton.Position = UDim2.new(0, 0, 0, 0)
-gearButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-gearButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-gearButton.Text = "GEAR"
-gearButton.Font = Enum.Font.GothamBold
-gearButton.TextSize = 14
-gearButton.Parent = buttonContainer
+-- Buton renkleri
+local BUTTON_COLORS = {
+	Color3.fromRGB(255, 100, 100),  -- Kırmızı
+	Color3.fromRGB(100, 255, 100),  -- Yeşil
+	Color3.fromRGB(100, 100, 255)   -- Mavi
+}
 
--- Event butonu oluştur
-local eventButton = Instance.new("TextButton")
-eventButton.Name = "EventButton"
-eventButton.Size = UDim2.new(0, 80, 0, 40)
-eventButton.Position = UDim2.new(0, 90, 0, 0)
-eventButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
-eventButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-eventButton.Text = "EVENT"
-eventButton.Font = Enum.Font.GothamBold
-eventButton.TextSize = 14
-eventButton.Parent = buttonContainer
+-- Buton isimleri
+local BUTTON_NAMES = {
+	"GEAR",
+	"Event", 
+	"ASC"
+}
 
--- Buton efektleri - Gear
-gearButton.MouseEnter:Connect(function()
-	gearButton.BackgroundColor3 = Color3.fromRGB(0, 140, 225)
-end)
+-- Okunaklı font seçenekleri (en iyileri)
+local FONT_OPTIONS = {
+	Enum.Font.FredokaOne,      -- Çok okunaklı, kalın
+	Enum.Font.Oswald,          -- Geniş ve net
+	Enum.Font.Arcade,          -- Oyun stili, net
+	Enum.Font.GothamBlack,     -- Modern ve kalın
+	Enum.Font.GothamBold,      -- Önceki kullanım
+	Enum.Font.Highway,         -- Büyük ve net
+	Enum.Font.SourceSansBold,  -- Basit ve okunaklı
+	Enum.Font.Antique,         -- Kalın ve net
+}
 
-gearButton.MouseLeave:Connect(function()
-	gearButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-end)
+-- Seçilen font (istediğiniz fontu buradan değiştirebilirsiniz)
+local SELECTED_FONT = Enum.Font.GothamBlack
 
--- Buton efektleri - Event
-eventButton.MouseEnter:Connect(function()
-	eventButton.BackgroundColor3 = Color3.fromRGB(225, 80, 0)
-end)
-
-eventButton.MouseLeave:Connect(function()
-	eventButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
-end)
-
--- Işınlanma koordinatları (istediğiniz gibi değiştirebilirsiniz)
-local gearPosition = Vector3.new(-285, 4, -14)  -- Gear bölgesi koordinatları
-local eventPosition = Vector3.new(-113, 5, 1) -- Event bölgesi koordinatları
-
--- Işınlanma fonksiyonu - Gear
-local function teleportToGear()
-	local character = player.Character
-	if character and character:FindFirstChild("HumanoidRootPart") then
-		local hrp = character.HumanoidRootPart
-		
-		-- Buton efektleri
-		gearButton.Text = "Işınlanıyor..."
-		gearButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-		
-		-- Işınlanma efektleri için
-		local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local tween = TweenService:Create(gearButton, tweenInfo, {BackgroundTransparency = 0.5})
-		tween:Play()
-		
-		-- Işınlanma
-		hrp.CFrame = CFrame.new(gearPosition)
-		
-		-- 1 saniye bekle
-		wait(1)
-		
-		-- Butonu eski haline getir
-		gearButton.Text = "GEAR"
-		gearButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-		gearButton.BackgroundTransparency = 0
-		
-		-- Koordinatları güncelle
-		--updateCoordinates()
+-- Eski butonları temizle
+local function CleanupOldButtons()
+	local screenGui = playerGui:FindFirstChild("TeleportButtonsGui")
+	if screenGui then
+		screenGui:Destroy()
 	end
 end
 
--- Işınlanma fonksiyonu - Event
-local function teleportToEvent()
-	local character = player.Character
-	if character and character:FindFirstChild("HumanoidRootPart") then
-		local hrp = character.HumanoidRootPart
-		
-		-- Buton efektleri
-		eventButton.Text = "Işınlanıyor..."
-		eventButton.BackgroundColor3 = Color3.fromRGB(200, 70, 0)
-		
-		-- Işınlanma efektleri için
-		local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local tween = TweenService:Create(eventButton, tweenInfo, {BackgroundTransparency = 0.5})
+-- Buton oluştur
+local function CreateTeleportButton(index)
+	local button = Instance.new("TextButton")
+	button.Name = "TeleportButton" .. index
+	button.Size = UDim2.new(0, 80, 0, 40)
+	button.Position = BUTTON_POSITIONS[index]
+	button.BackgroundColor3 = BUTTON_COLORS[index]
+	button.Text = BUTTON_NAMES[index]
+	button.TextColor3 = Color3.new(1, 1, 1)  -- Beyaz yazı
+	--button.TextScaled = true
+	button.TextSize = 16
+	button.Font = SELECTED_FONT
+	button.TextStrokeColor3 = Color3.new(0, 0, 0)  -- Siyah outline
+	button.TextStrokeTransparency = 0  -- Outline tam opak
+	button.ZIndex = 10 -- Diğer elementlerin üstünde görünmesi için
+	
+	-- Buton stilleri
+	button.AutoButtonColor = true
+	button.BackgroundTransparency = 0.2  -- Daha az şeffaf
+	
+	-- Köşe yuvarlatma
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = button
+	
+	-- Buton kenarlığı
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.new(0, 0, 0)  -- Beyaz kenarlık
+	stroke.Thickness = 1.5
+	stroke.Parent = button
+	
+	-- Gradient efekti (isteğe bağlı, daha güzel görünüm için)
+	local gradient = Instance.new("UIGradient")
+	gradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, BUTTON_COLORS[index]),
+		ColorSequenceKeypoint.new(1, Color3.new(
+			math.clamp(BUTTON_COLORS[index].R * 0.7, 0, 1),
+			math.clamp(BUTTON_COLORS[index].G * 0.7, 0, 1),
+			math.clamp(BUTTON_COLORS[index].B * 0.7, 0, 1)
+		))
+	})
+	gradient.Parent = button
+	
+	-- Işınlanma fonksiyonu
+	button.MouseButton1Click:Connect(function()
+		local character = player.Character
+		if character and character:FindFirstChild("HumanoidRootPart") then
+			local humanoidRootPart = character.HumanoidRootPart
+			
+			-- Işınlanma efekti
+			local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+			local tween = TweenService:Create(button, tweenInfo, {
+				BackgroundTransparency = 0.6,
+				TextTransparency = 0.5,
+				TextStrokeTransparency = 0.3
+			})
+			tween:Play()
+			
+			-- Işınlanma
+			humanoidRootPart.CFrame = CFrame.new(TELEPORT_POSITIONS[index])
+			
+			-- Butonu eski haline getir
+			wait(0.5)
+			local tweenBack = TweenService:Create(button, tweenInfo, {
+				BackgroundTransparency = 0.2,
+				TextTransparency = 0,
+				TextStrokeTransparency = 0
+			})
+			tweenBack:Play()
+			
+			print(BUTTON_NAMES[index] .. " konumuna ışınlandı: " .. tostring(TELEPORT_POSITIONS[index]))
+		else
+			warn("Karakter bulunamadı!")
+		end
+	end)
+	
+	-- Hover efekti
+	button.MouseEnter:Connect(function()
+		local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		local tween = TweenService:Create(button, tweenInfo, {
+			Size = UDim2.new(0, 85, 0, 42),
+			BackgroundTransparency = 0.1
+		})
 		tween:Play()
-		
-		-- Işınlanma
-		hrp.CFrame = CFrame.new(eventPosition)
-		
-		-- 1 saniye bekle
-		wait(1)
-		
-		-- Butonu eski haline getir
-		eventButton.Text = "EVENT"
-		eventButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
-		eventButton.BackgroundTransparency = 0
-		
-		-- Koordinatları güncelle
-		--updateCoordinates()
-	end
+	end)
+	
+	button.MouseLeave:Connect(function()
+		local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		local tween = TweenService:Create(button, tweenInfo, {
+			Size = UDim2.new(0, 80, 0, 40),
+			BackgroundTransparency = 0.2
+		})
+		tween:Play()
+	end)
+	
+	return button
 end
 
--- Buton tıklama event'leri
-gearButton.MouseButton1Click:Connect(teleportToGear)
-eventButton.MouseButton1Click:Connect(teleportToEvent)
+-- Ana fonksiyon
+local function InitializeTeleportButtons()
+	-- Eski butonları temizle
+	CleanupOldButtons()
+	
+	-- ScreenGui oluştur
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "TeleportButtonsGui"
+	screenGui.ResetOnSpawn = false
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+	screenGui.Parent = playerGui
+	
+	-- Butonları oluştur
+	for i = 1, 3 do
+		local button = CreateTeleportButton(i)
+		button.Parent = screenGui
+	end
+	
+	print("Teleport butonları başarıyla yüklendi!")
+	print("Kullanılan font: " .. tostring(SELECTED_FONT))
+end
 
+-- Script başlatıldığında butonları oluştur
+InitializeTeleportButtons()
 
+-- Oyun yüklenmesini bekle ve karakter hazır olduğunda kontrol et
+player.CharacterAdded:Connect(function(character)
+	wait(1)
+	print("Karakter yüklendi, butonlar aktif!")
+end)
+
+print("Grow a Garden Teleport Butonları aktif!")
