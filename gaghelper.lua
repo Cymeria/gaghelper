@@ -1,9 +1,10 @@
--- Grow a Garden Teleport Script - DÜZELTİLMİŞ
+-- Grow a Garden Teleport Script - LOCAL STORAGE
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local savedPosition = nil
+local savedPosition1 = nil -- 4. buton için konum
+local savedPosition2 = nil -- 5. buton için konum
 
 -- ⚙️ AYARLAR - Bu kısmı değiştirebilirsin
 local BUTON_AYARLARI = {
@@ -25,10 +26,77 @@ local BUTON_AYARLARI = {
         Color3.fromRGB(74, 124, 255),  -- Mavi (Gear)
         Color3.fromRGB(255, 87, 87),   -- Kırmızı (Event)
         Color3.fromRGB(76, 175, 80),   -- Yeşil (ASC)
-        Color3.fromRGB(255, 193, 7),   -- Sarı (Kaydetme)
-        Color3.fromRGB(156, 39, 176)   -- Mor (Işınlanma)
+        Color3.fromRGB(255, 193, 7),   -- Sarı (Kaydetme 1)
+        Color3.fromRGB(156, 39, 176),  -- Mor (Işınlanma 1)
+        Color3.fromRGB(255, 152, 0),   -- Turuncu (Kaydetme 2)
+        Color3.fromRGB(0, 150, 136)    -- Turkuaz (Işınlanma 2)
     }
 }
+
+-- 📁 LOCAL STORAGE FONKSİYONLARI
+local function SavePositionToStorage(position, slot)
+    local success, errorMessage = pcall(function()
+        -- LocalStorage'a kaydet
+        local storageData = {
+            X = position.X,
+            Y = position.Y, 
+            Z = position.Z,
+            Timestamp = os.time(),
+            Slot = slot
+        }
+        
+        -- JSON formatında kaydet (string olarak)
+        local jsonData = game:GetService("HttpService"):JSONEncode(storageData)
+        
+        -- LocalStorage'a kaydet
+        if plugin then
+            plugin:SetSetting("GardenSavedPosition_" .. slot, jsonData)
+        else
+            -- Studio dışında çalışıyorsa player'in datasını kullan
+            print("LOCAL_SAVE_SLOT_" .. slot .. ":" .. jsonData)
+        end
+        
+        return true
+    end)
+    
+    if success then
+        print("✅ Konum " .. slot .. " LocalStorage'a kaydedildi")
+        return true
+    else
+        print("❌ LocalStorage kaydı başarısız: " .. tostring(errorMessage))
+        return false
+    end
+end
+
+local function LoadPositionFromStorage(slot)
+    local success, result = pcall(function()
+        -- LocalStorage'dan yükle
+        local savedData = nil
+        
+        if plugin then
+            savedData = plugin:GetSetting("GardenSavedPosition_" .. slot)
+        else
+            -- Studio dışı için alternatif
+            print("🔍 LocalStorage'tan konum " .. slot .. " yükleniyor...")
+            return nil
+        end
+        
+        if savedData then
+            local positionData = game:GetService("HttpService"):JSONDecode(savedData)
+            return Vector3.new(positionData.X, positionData.Y, positionData.Z)
+        end
+        
+        return nil
+    end)
+    
+    if success and result then
+        print("✅ LocalStorage'dan konum " .. slot .. " yüklendi: " .. tostring(result))
+        return result
+    else
+        print("📭 LocalStorage'da kayıtlı konum " .. slot .. " bulunamadı")
+        return nil
+    end
+end
 
 -- Önce PlayerGui'nin hazır olmasını bekle
 if not player:FindFirstChild("PlayerGui") then
@@ -58,12 +126,12 @@ local function CreateButton(name, position, size, text, backgroundColor)
     button.ZIndex = 1
     
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
+    corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = button
     
     local shadow = Instance.new("UIStroke")
     shadow.Color = Color3.new(0, 0, 0)
-    shadow.Thickness = 2
+    shadow.Thickness = 1.5
     shadow.Parent = button
     
     return button
@@ -76,8 +144,8 @@ local function AnimateButton(button)
     
     local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
     local tween = TweenService:Create(button, tweenInfo, {
-        Size = originalSize - UDim2.new(0, 4, 0, 4),
-        Position = originalPosition + UDim2.new(0, 2, 0, 2)
+        Size = originalSize - UDim2.new(0, 3, 0, 3),
+        Position = originalPosition + UDim2.new(0, 1.5, 0, 1.5)
     })
     tween:Play()
     
@@ -115,19 +183,22 @@ local function CreateTeleportGUI()
     screenGui.Parent = player.PlayerGui
     
     -- Buton boyutları
-    local BUTTON_SIZE = UDim2.new(0, 100, 0, 35)
-    local BUTTON4_1_SIZE = UDim2.new(0, 28, 0, 35)
-    local BUTTON4_2_SIZE = UDim2.new(0, 70, 0, 35)
+    local BUTTON_SIZE = UDim2.new(0, 100, 0, 30)
+    local BUTTON4_1_SIZE = UDim2.new(0, 28, 0, 30)
+    local BUTTON4_2_SIZE = UDim2.new(0, 70, 0, 30)
+    local BUTTON5_1_SIZE = UDim2.new(0, 28, 0, 30)
+    local BUTTON5_2_SIZE = UDim2.new(0, 70, 0, 30)
     
     -- Buton pozisyonları
     local BUTTON_POSITIONS = {
         UDim2.new(0, 5, 0, 25),   -- Buton 1 (Gear)
-        UDim2.new(0, 5, 0, 65),   -- Buton 2 (Event)
-        UDim2.new(0, 5, 0, 105),  -- Buton 3 (ASC)
-        UDim2.new(0, 5, 0, 145)   -- Buton 4-1 (Kaydetme)
+        UDim2.new(0, 5, 0, 60),   -- Buton 2 (Event)
+        UDim2.new(0, 5, 0, 95),   -- Buton 3 (ASC)
+        UDim2.new(0, 5, 0, 130),  -- Buton 4-1 (Kaydetme)
+        UDim2.new(0, 33, 0, 130), -- Buton 4-2 (Git)
+        UDim2.new(0, 5, 0, 165),  -- Buton 5-1 (Kaydetme)
+        UDim2.new(0, 33, 0, 165)  -- Buton 5-2 (Git2)
     }
-    
-    local BUTTON4_2_POSITION = UDim2.new(0, 35, 0, 145)
     
     -- İlk 3 butonu oluştur (Gear, Event, ASC)
     for i = 1, 3 do
@@ -148,52 +219,123 @@ local function CreateTeleportGUI()
         end)
     end
     
-    -- 4-1 Buton (Kaydetme)
-    local saveButton = CreateButton(
-        "SavePositionButton",
+    -- 4-1 Buton (Kaydetme 1)
+    local saveButton1 = CreateButton(
+        "SavePositionButton1",
         BUTTON_POSITIONS[4],
         BUTTON4_1_SIZE,
         "💾",
         BUTON_AYARLARI.ButonRenkleri[4]
     )
-    saveButton.Parent = screenGui
+    saveButton1.Parent = screenGui
     
-    saveButton.MouseButton1Click:Connect(function()
-        AnimateButton(saveButton)
+    saveButton1.MouseButton1Click:Connect(function()
+        AnimateButton(saveButton1)
         local character = player.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
-            savedPosition = character.HumanoidRootPart.Position
-            print("Konum kaydedildi: " .. tostring(savedPosition))
-            saveButton.Text = "✓"
+            local currentPosition = character.HumanoidRootPart.Position
+            savedPosition1 = currentPosition
+            
+            -- LocalStorage'a kaydet (Slot 1)
+            local saveSuccess = SavePositionToStorage(currentPosition, 1)
+            
+            if saveSuccess then
+                saveButton1.Text = "✓"
+                print("📍 Konum 1 kaydedildi: " .. tostring(savedPosition1))
+            else
+                saveButton1.Text = "❌"
+                print("❌ Konum 1 kaydedilemedi!")
+            end
+            
             wait(1)
-            saveButton.Text = "💾"
+            saveButton1.Text = "💾"
         end
     end)
     
-    -- 4-2 Buton (Kayıtlı Konuma Işınlanma)
-    local teleportButton = CreateButton(
-        "TeleportToSavedButton",
-        BUTTON4_2_POSITION,
+    -- 4-2 Buton (Kayıtlı Konum 1'e Işınlanma)
+    local teleportButton1 = CreateButton(
+        "TeleportToSavedButton1",
+        BUTTON_POSITIONS[5],
         BUTTON4_2_SIZE,
-        " Git > ",
+        "Git 1",
         BUTON_AYARLARI.ButonRenkleri[5]
     )
-    teleportButton.Parent = screenGui
+    teleportButton1.Parent = screenGui
     
-    teleportButton.MouseButton1Click:Connect(function()
-        AnimateButton(teleportButton)
-        if savedPosition then
-            if TeleportToPosition(savedPosition) then
-                print("Kayıtlı konuma ışınlandı: " .. tostring(savedPosition))
+    teleportButton1.MouseButton1Click:Connect(function()
+        AnimateButton(teleportButton1)
+        if savedPosition1 then
+            if TeleportToPosition(savedPosition1) then
+                print("📍 Konum 1'e ışınlandı: " .. tostring(savedPosition1))
             else
-                teleportButton.Text = "Hata!"
+                teleportButton1.Text = "Hata!"
                 wait(1)
-                teleportButton.Text = "Kayıtlı Konuma Git"
+                teleportButton1.Text = "Git 1"
             end
         else
-            teleportButton.Text = "Konum Yok!"
+            teleportButton1.Text = "Kayıt Yok!"
             wait(1)
-            teleportButton.Text = "Kayıtlı Konuma Git"
+            teleportButton1.Text = "Git 1"
+        end
+    end)
+    
+    -- 5-1 Buton (Kaydetme 2)
+    local saveButton2 = CreateButton(
+        "SavePositionButton2",
+        BUTTON_POSITIONS[6],
+        BUTTON5_1_SIZE,
+        "💾",
+        BUTON_AYARLARI.ButonRenkleri[6]
+    )
+    saveButton2.Parent = screenGui
+    
+    saveButton2.MouseButton1Click:Connect(function()
+        AnimateButton(saveButton2)
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local currentPosition = character.HumanoidRootPart.Position
+            savedPosition2 = currentPosition
+            
+            -- LocalStorage'a kaydet (Slot 2)
+            local saveSuccess = SavePositionToStorage(currentPosition, 2)
+            
+            if saveSuccess then
+                saveButton2.Text = "✓"
+                print("📍 Konum 2 kaydedildi: " .. tostring(savedPosition2))
+            else
+                saveButton2.Text = "❌"
+                print("❌ Konum 2 kaydedilemedi!")
+            end
+            
+            wait(1)
+            saveButton2.Text = "💾"
+        end
+    end)
+    
+    -- 5-2 Buton (Kayıtlı Konum 2'ye Işınlanma)
+    local teleportButton2 = CreateButton(
+        "TeleportToSavedButton2",
+        BUTTON_POSITIONS[7],
+        BUTTON5_2_SIZE,
+        "Git 2",
+        BUTON_AYARLARI.ButonRenkleri[7]
+    )
+    teleportButton2.Parent = screenGui
+    
+    teleportButton2.MouseButton1Click:Connect(function()
+        AnimateButton(teleportButton2)
+        if savedPosition2 then
+            if TeleportToPosition(savedPosition2) then
+                print("📍 Konum 2'ye ışınlandı: " .. tostring(savedPosition2))
+            else
+                teleportButton2.Text = "Hata!"
+                wait(1)
+                teleportButton2.Text = "Git 2"
+            end
+        else
+            teleportButton2.Text = "Kayıt Yok!"
+            wait(1)
+            teleportButton2.Text = "Git 2"
         end
     end)
     
@@ -239,13 +381,23 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 -- İLK YÜKLEME
-if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+-- Önce LocalStorage'dan konumları yükle
+savedPosition1 = LoadPositionFromStorage(1)
+savedPosition2 = LoadPositionFromStorage(2)
+
+-- Sonra GUI'yi oluştur
+if player.Character and player:FindFirstChild("PlayerGui") then
     CreateTeleportGUI()
 else
-    player.CharacterAdded:Wait():WaitForChild("HumanoidRootPart")
+    if player.Character then
+        player.Character:WaitForChild("HumanoidRootPart")
+    else
+        player.CharacterAdded:Wait():WaitForChild("HumanoidRootPart")
+    end
     wait(0.5)
     CreateTeleportGUI()
 end
 
 print("🎮 Grow a Garden Teleport Sistemi AKTİF!")
-print("⚙️ Butonlar: Gear, Event, ASC olarak ayarlandı")
+print("💾 2 farklı konum kaydı desteği")
+print("⚙️ Butonlar: Gear, Event, ASC, Konum 1, Konum 2")
