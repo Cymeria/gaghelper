@@ -184,9 +184,9 @@ local function CreateTeleportGUI()
     
     -- Buton boyutları
     local BUTTON_SIZE = UDim2.new(0, 100, 0, 30)
-    local BUTTON4_1_SIZE = UDim2.new(0, 28, 0, 28)
+    local BUTTON4_1_SIZE = UDim2.new(0, 30, 0, 30)
     local BUTTON4_2_SIZE = UDim2.new(0, 65, 0, 30)
-    local BUTTON5_1_SIZE = UDim2.new(0, 28, 0, 28)
+    local BUTTON5_1_SIZE = UDim2.new(0, 30, 0, 30)
     local BUTTON5_2_SIZE = UDim2.new(0, 65, 0, 30)
     
     -- Buton pozisyonları
@@ -401,4 +401,5 @@ end
 print("🎮 Grow a Garden Teleport Sistemi AKTİF!")
 print("💾 2 farklı konum kaydı desteği")
 print("⚙️ Butonlar: Gear, Event, ASC, Konum 1, Konum 2")
+
 
