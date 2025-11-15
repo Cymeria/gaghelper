@@ -25,7 +25,7 @@ local BUTON_AYARLARI = {
     ButonRenkleri = {
         Color3.fromRGB(74, 124, 255),  -- Mavi (Gear)
         Color3.fromRGB(255, 87, 87),   -- Kırmızı (Event)
-        Color3.fromRGB(76, 175, 60),   -- Yeşil (ASC)
+        Color3.fromRGB(76, 135, 60),   -- Yeşil (ASC)
         Color3.fromRGB(255, 193, 7),   -- Sarı (Kaydetme 1)
         Color3.fromRGB(156, 39, 176),  -- Mor (Işınlanma 1)
         Color3.fromRGB(255, 152, 0),   -- Turuncu (Kaydetme 2)
@@ -401,6 +401,7 @@ end
 print("🎮 Grow a Garden Teleport Sistemi AKTİF!")
 print("💾 2 farklı konum kaydı desteği")
 print("⚙️ Butonlar: Gear, Event, ASC, Konum 1, Konum 2")
+
 
 
 
