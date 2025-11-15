@@ -25,7 +25,7 @@ local BUTON_AYARLARI = {
     ButonRenkleri = {
         Color3.fromRGB(74, 124, 255),  -- Mavi (Gear)
         Color3.fromRGB(255, 87, 87),   -- Kırmızı (Event)
-        Color3.fromRGB(76, 175, 80),   -- Yeşil (ASC)
+        Color3.fromRGB(76, 175, 60),   -- Yeşil (ASC)
         Color3.fromRGB(255, 193, 7),   -- Sarı (Kaydetme 1)
         Color3.fromRGB(156, 39, 176),  -- Mor (Işınlanma 1)
         Color3.fromRGB(255, 152, 0),   -- Turuncu (Kaydetme 2)
@@ -191,13 +191,13 @@ local function CreateTeleportGUI()
     
     -- Buton pozisyonları
     local BUTTON_POSITIONS = {
-        UDim2.new(0, 5, 0, 25),   -- Buton 1 (Gear)
-        UDim2.new(0, 5, 0, 60),   -- Buton 2 (Event)
-        UDim2.new(0, 5, 0, 95),   -- Buton 3 (ASC)
-        UDim2.new(0, 5, 0, 130),  -- Buton 4-1 (Kaydetme)
-        UDim2.new(0, 38, 0, 130), -- Buton 4-2 (Git)
-        UDim2.new(0, 5, 0, 165),  -- Buton 5-1 (Kaydetme)
-        UDim2.new(0, 38, 0, 165)  -- Buton 5-2 (Git2)
+        UDim2.new(0, 5, 0, 15),   -- Buton 1 (Gear)
+        UDim2.new(0, 5, 0, 50),   -- Buton 2 (Event)
+        UDim2.new(0, 5, 0, 85),   -- Buton 3 (ASC)
+        UDim2.new(0, 5, 0, 120),  -- Buton 4-1 (Kaydetme)
+        UDim2.new(0, 38, 0, 120), -- Buton 4-2 (Git)
+        UDim2.new(0, 5, 0, 155),  -- Buton 5-1 (Kaydetme)
+        UDim2.new(0, 38, 0, 155)  -- Buton 5-2 (Git2)
     }
     
     -- İlk 3 butonu oluştur (Gear, Event, ASC)
@@ -401,5 +401,6 @@ end
 print("🎮 Grow a Garden Teleport Sistemi AKTİF!")
 print("💾 2 farklı konum kaydı desteği")
 print("⚙️ Butonlar: Gear, Event, ASC, Konum 1, Konum 2")
+
 
 
