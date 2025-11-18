@@ -404,4 +404,55 @@ print("⚙️ Butonlar: Gear, Event, ASC, Konum 1, Konum 2")
 
 
 
+--Toggles the infinite jump between on or off on every script run
+_G.infinjump = not _G.infinjump
 
+if _G.infinJumpStarted == nil then
+	--Ensures this only runs once to save resources
+	_G.infinJumpStarted = true
+
+	--The actual infinite jump
+	local plr = game:GetService('Players').LocalPlayer
+	
+	function doJump()
+		if _G.infinjump then
+			humanoid = game:GetService'Players'.LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+			humanoid:ChangeState('Jumping')
+			wait()
+			humanoid:ChangeState('Seated')
+		end
+	end
+	
+	--PC Support
+	local m = plr:GetMouse()
+	m.KeyDown:connect(function(k)
+		if k:byte() == 32 then
+			doJump()
+		end
+	end)
+	
+	--Mobile support
+	local uis = game:GetService("UserInputService")
+	task.spawn(function()
+		local pg = plr:WaitForChild("PlayerGui")
+		local btn = pg:WaitForChild("TouchGui"):WaitForChild("TouchControlFrame"):WaitForChild("JumpButton", 3)
+		if btn then
+			btn.MouseButton1Down:Connect(doJump)
+		else
+			uis.JumpRequest:Connect(doJump)
+		end
+	end)
+end
+
+
+
+
+
+
+
+
+
+
+
+	--Notifies readiness
+	game.StarterGui:SetCore("SendNotification", {Title="Cymeria"; Text="Yükleme Tamamlandı!"; Duration=5;})
