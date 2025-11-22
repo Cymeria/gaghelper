@@ -1,4 +1,4 @@
--- Grow a Garden Teleport Script - LOCAL STORAGE
+-- Grow a Garden Teleport Script - PERSISTENT STORAGE
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
@@ -33,67 +33,84 @@ local BUTON_AYARLARI = {
     }
 }
 
--- 📁 LOCAL STORAGE FONKSİYONLARI
+-- 📁 PERSISTENT STORAGE FONKSİYONLARI (Kalıcı - Dosyaya kaydedilir)
+local HttpService = game:GetService("HttpService")
+local SAVE_FILE_NAME = "GardenPositions.json"
+
+-- Tüm kayıtlı pozisyonları yükle
+local function LoadAllPositions()
+    local success, result = pcall(function()
+        local fileData = readfile(SAVE_FILE_NAME)
+        return HttpService:JSONDecode(fileData)
+    end)
+    
+    if success and result then
+        return result
+    else
+        return {} -- Dosya yoksa boş tablo döndür
+    end
+end
+
+-- Tüm pozisyonları dosyaya kaydet
+local function SaveAllPositions(positions)
+    local success, errorMessage = pcall(function()
+        local jsonData = HttpService:JSONEncode(positions)
+        writefile(SAVE_FILE_NAME, jsonData)
+    end)
+    
+    return success
+end
+
 local function SavePositionToStorage(position, slot)
     local success, errorMessage = pcall(function()
-        -- LocalStorage'a kaydet
-        local storageData = {
+        -- Mevcut tüm kayıtları yükle
+        local allPositions = LoadAllPositions()
+        
+        -- Yeni pozisyonu ekle/güncelle
+        allPositions["Slot_" .. slot] = {
             X = position.X,
             Y = position.Y, 
             Z = position.Z,
-            Timestamp = os.time(),
+            Timestamp = tick(),
             Slot = slot
         }
         
-        -- JSON formatında kaydet (string olarak)
-        local jsonData = game:GetService("HttpService"):JSONEncode(storageData)
-        
-        -- LocalStorage'a kaydet
-        if plugin then
-            plugin:SetSetting("GardenSavedPosition_" .. slot, jsonData)
-        else
-            -- Studio dışında çalışıyorsa player'in datasını kullan
-            print("LOCAL_SAVE_SLOT_" .. slot .. ":" .. jsonData)
-        end
+        -- Dosyaya kaydet
+        local jsonData = HttpService:JSONEncode(allPositions)
+        writefile(SAVE_FILE_NAME, jsonData)
         
         return true
     end)
     
     if success then
-        print("✅ Konum " .. slot .. " LocalStorage'a kaydedildi")
+        print("✅ Konum " .. slot .. " dosyaya kaydedildi (Kalıcı)")
         return true
     else
-        print("❌ LocalStorage kaydı başarısız: " .. tostring(errorMessage))
+        print("❌ Kayıt başarısız: " .. tostring(errorMessage))
         return false
     end
 end
 
 local function LoadPositionFromStorage(slot)
     local success, result = pcall(function()
-        -- LocalStorage'dan yükle
-        local savedData = nil
+        -- Dosyadan tüm pozisyonları yükle
+        local fileData = readfile(SAVE_FILE_NAME)
+        local allPositions = HttpService:JSONDecode(fileData)
         
-        if plugin then
-            savedData = plugin:GetSetting("GardenSavedPosition_" .. slot)
-        else
-            -- Studio dışı için alternatif
-            print("🔍 LocalStorage'tan konum " .. slot .. " yükleniyor...")
-            return nil
-        end
+        local savedData = allPositions["Slot_" .. slot]
         
         if savedData then
-            local positionData = game:GetService("HttpService"):JSONDecode(savedData)
-            return Vector3.new(positionData.X, positionData.Y, positionData.Z)
+            return Vector3.new(savedData.X, savedData.Y, savedData.Z)
         end
         
         return nil
     end)
     
     if success and result then
-        print("✅ LocalStorage'dan konum " .. slot .. " yüklendi: " .. tostring(result))
+        print("✅ Konum " .. slot .. " dosyadan yüklendi: " .. tostring(result))
         return result
     else
-        print("📭 LocalStorage'da kayıtlı konum " .. slot .. " bulunamadı")
+        print("📭 Kayıtlı konum " .. slot .. " bulunamadı")
         return nil
     end
 end
@@ -236,7 +253,7 @@ local function CreateTeleportGUI()
             local currentPosition = character.HumanoidRootPart.Position
             savedPosition1 = currentPosition
             
-            -- LocalStorage'a kaydet (Slot 1)
+            -- Dosyaya kaydet (Slot 1)
             local saveSuccess = SavePositionToStorage(currentPosition, 1)
             
             if saveSuccess then
@@ -296,7 +313,7 @@ local function CreateTeleportGUI()
             local currentPosition = character.HumanoidRootPart.Position
             savedPosition2 = currentPosition
             
-            -- LocalStorage'a kaydet (Slot 2)
+            -- Dosyaya kaydet (Slot 2)
             local saveSuccess = SavePositionToStorage(currentPosition, 2)
             
             if saveSuccess then
@@ -381,7 +398,7 @@ player.CharacterAdded:Connect(function(character)
 end)
 
 -- İLK YÜKLEME
--- Önce LocalStorage'dan konumları yükle
+-- Önce dosyadan konumları yükle
 savedPosition1 = LoadPositionFromStorage(1)
 savedPosition2 = LoadPositionFromStorage(2)
 
@@ -399,8 +416,9 @@ else
 end
 
 print("🎮 Grow a Garden Teleport Sistemi AKTİF!")
-print("💾 2 farklı konum kaydı desteği")
+print("💾 2 farklı konum kaydı desteği (Kalıcı)")
 print("⚙️ Butonlar: Gear, Event, ASC, Konum 1, Konum 2")
+print("📁 Kayıtlar 'GardenPositions.json' dosyasına kaydediliyor")
 
 
 
@@ -445,17 +463,5 @@ if _G.infinJumpStarted == nil then
 end
 
 
-
-
-
-
-
-
-
-
-
-	--Notifies readiness
+	--Scriptin yüklenmesi tamamlandı
 	game.StarterGui:SetCore("SendNotification", {Title="Cymeria"; Text="Yükleme Tamamlandı!"; Duration=5;})
-
-
-
