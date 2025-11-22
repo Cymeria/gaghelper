@@ -18,7 +18,7 @@ local BUTON_AYARLARI = {
     IsinlanmaKoordinatlari = {
         Vector3.new(-236, 3, -14),    -- Gear butonu için
         Vector3.new(-113, 5, 1),      -- Event butonu için
-        Vector3.new(80, 3, 170)      -- ASC butonu için
+        Vector3.new(77, 3, 167)      -- ASC butonu için
     },
     
     -- Buton renkleri
@@ -456,5 +456,6 @@ end
 
 	--Notifies readiness
 	game.StarterGui:SetCore("SendNotification", {Title="Cymeria"; Text="Yükleme Tamamlandı!"; Duration=5;})
+
 
 
